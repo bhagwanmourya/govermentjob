@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const TEST_MODE = new URLSearchParams(window.location.search).has("test");
 
   // September = month 8 in JavaScript
-  const UNLOCK_DATE = new Date(2026, 8, 18, 0, 0, 0);
+  const UNLOCK_DATE = new Date(2026, 8, 19, 0, 0, 0);
 
   const reduceMotion =
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
