@@ -1132,7 +1132,7 @@ const orbitMemoryData = [
    EXISTING FUNCTION — KEEP THIS
    --------------------------------------------------------- */
 
-function openMemoryImage(number) {
+function openMemoryImage(number, originEl = null) {
 
   const data = orbitMemoryData[number - 1];
 
@@ -1141,19 +1141,10 @@ function openMemoryImage(number) {
     return;
   }
 
-  console.log(
-    `Orbit clicked: ${data.label} -> ${data.image}`
-  );
+  console.log(`Orbit clicked: ${data.label} -> ${data.image}`);
 
-  /* Open image in your existing unified viewer */
-  if (typeof openUnifiedViewer === "function") {
-    openUnifiedViewer(
-      data.image,
-      data.label
-    );
-  } else {
-    console.warn("openUnifiedViewer() not found.");
-  }
+  /* Click -> visible sparkle burst -> unified viewer */
+  sparkleAndOpen(data.image, data.label, originEl);
 }
 
 
@@ -1599,227 +1590,60 @@ if (galleryInner) {
    SPARKLE EFFECT
    ========================================================= */
 
-function spawnFlipSparkles(
-  originEl,
-  onDone
-) {
+function spawnFlipSparkles(originEl, onDone) {
+  const finish = typeof onDone === "function" ? onDone : () => { };
 
-  if (!originEl) {
-
-    onDone?.();
-
+  if (!originEl || !document.body) {
+    finish();
     return;
-
   }
 
+  const rect = originEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
 
-  const rect =
-    originEl.getBoundingClientRect();
+  const layer = document.createElement("div");
+  layer.className = "memory-sparkle-layer";
+  layer.style.left = `${cx}px`;
+  layer.style.top = `${cy}px`;
+  document.body.appendChild(layer);
 
-  const cx =
-    rect.left +
-    rect.width / 2;
+  const ring = document.createElement("span");
+  ring.className = "memory-sparkle-ring";
+  layer.appendChild(ring);
 
-  const cy =
-    rect.top +
-    rect.height / 2;
+  const flash = document.createElement("span");
+  flash.className = "memory-sparkle-flash";
+  layer.appendChild(flash);
 
+  const symbols = ["✦", "✧", "✦", "⋆"];
+  const colors = ["#ffffff", "#f2ecd9", "#ffd9f5", "#fff5a0", "#d9f0ff", "#cfd4ff"];
+  const particleCount = 34;
 
-  const PARTICLE_COUNT = 42;
-
-  const particles = [];
-
-
-  const colors = [
-    "#ffffff",
-    "#f2ecd9",
-    "#a9b0e8",
-    "#ffd9f5",
-    "#d9f0ff",
-    "#fff5a0"
-  ];
-
-
-  for (
-    let i = 0;
-    i < PARTICLE_COUNT;
-    i++
-  ) {
-
-    const particle =
-      document.createElement("div");
-
-
-    particle.className =
-      "flip-sparkle-particle";
-
-
-    const size =
-      3 +
-      Math.random() * 7;
-
-
-    particle.style.width =
-      `${size}px`;
-
-    particle.style.height =
-      `${size}px`;
-
-
-    particle.style.left =
-      `${cx}px`;
-
-    particle.style.top =
-      `${cy}px`;
-
-
-    particle.style.background =
-      colors[
-      Math.floor(
-        Math.random() *
-        colors.length
-      )
-      ];
-
-
-    particle.style.position =
-      "fixed";
-
-    particle.style.zIndex =
-      "99999";
-
-    particle.style.pointerEvents =
-      "none";
-
-
-    document.body.appendChild(
-      particle
-    );
-
-    particles.push(
-      particle
-    );
-
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement("span");
+    particle.className = "memory-sparkle-particle";
+    particle.textContent = symbols[i % symbols.length];
+    particle.style.color = colors[i % colors.length];
+    particle.style.fontSize = `${10 + Math.random() * 14}px`;
+    particle.style.setProperty("--angle", `${(i / particleCount) * 360 + (Math.random() * 16 - 8)}deg`);
+    particle.style.setProperty("--distance", `${70 + Math.random() * 150}px`);
+    particle.style.setProperty("--delay", `${Math.random() * 90}ms`);
+    particle.style.setProperty("--spin", `${Math.random() * 260 - 130}deg`);
+    layer.appendChild(particle);
   }
 
+  originEl.classList.add("sparkling", "memory-card-selected");
 
-  const useGSAP =
-    typeof gsap !== "undefined";
+  /* Let the viewer appear only after the sparkle has visibly burst. */
+  window.setTimeout(() => {
+    finish();
+  }, 700);
 
-
-  particles.forEach(
-    (particle, i) => {
-
-      const angle =
-        (
-          i /
-          PARTICLE_COUNT
-        ) *
-        Math.PI *
-        2 +
-        Math.random() *
-        0.4;
-
-
-      const distance =
-        80 +
-        Math.random() *
-        190;
-
-
-      const tx =
-        Math.cos(angle) *
-        distance;
-
-
-      const ty =
-        Math.sin(angle) *
-        distance;
-
-
-      const duration =
-        0.7 +
-        Math.random() *
-        0.5;
-
-
-      if (useGSAP) {
-
-        gsap.to(
-          particle,
-          {
-
-            x: tx,
-            y: ty,
-
-            opacity: 0,
-
-            scale: 0.1,
-
-            rotation:
-              Math.random() * 360,
-
-            duration,
-
-            delay:
-              i * 0.01,
-
-            ease:
-              "power2.out",
-
-            onComplete: () => {
-              particle.remove();
-            }
-
-          }
-        );
-
-      } else {
-
-        particle.style.transition =
-          `
-          transform ${duration}s ease-out ${i * 0.01}s,
-          opacity ${duration}s ease-out ${i * 0.01}s
-          `;
-
-
-        requestAnimationFrame(() => {
-
-          particle.style.transform =
-            `
-            translate(${tx}px, ${ty}px)
-            scale(0.1)
-            rotate(${Math.random() * 360}deg)
-            `;
-
-          particle.style.opacity =
-            "0";
-
-        });
-
-
-        setTimeout(
-          () => particle.remove(),
-          (
-            duration +
-            i * 0.01 +
-            0.2
-          ) * 1000
-        );
-
-      }
-
-    }
-  );
-
-
-  /* OPEN IMAGE */
-
-  setTimeout(
-    onDone,
-    450
-  );
-
+  window.setTimeout(() => {
+    layer.remove();
+    originEl.classList.remove("sparkling", "memory-card-selected");
+  }, 1150);
 }
 
 
@@ -2039,228 +1863,279 @@ document
   );
 
 /* =========================================================
-   FINAL WISH PARTICLE TEXT
+   FINAL WISH — ROBUST CLICK + SPARKLE + PARTICLE TEXT
    ========================================================= */
 
-const wishStar =
-  document.getElementById(
-    "wish-star"
-  );
-
-const wishCanvas =
-  document.getElementById(
-    "wish-canvas"
-  );
-
-const wishCtx =
-  wishCanvas?.getContext(
-    "2d"
-  );
+const wishStar = document.getElementById("wish-star");
+const wishCanvas = document.getElementById("wish-canvas");
+const wishCtx = wishCanvas?.getContext("2d");
+let wishTriggered = false;
+let wishHitTarget = null;
 
 function sizeWishCanvas() {
   if (!wishCanvas) return;
-
-  wishCanvas.width =
-    wishCanvas.clientWidth;
-
-  wishCanvas.height =
-    wishCanvas.clientHeight;
+  const rect = wishCanvas.getBoundingClientRect();
+  wishCanvas.width = Math.max(1, Math.round(rect.width));
+  wishCanvas.height = Math.max(1, Math.round(rect.height));
 }
 
-window.addEventListener(
-  "resize",
-  sizeWishCanvas
-);
+function createWishSparkleBurst(x, y) {
+  const layer = document.createElement("div");
+  layer.setAttribute("aria-hidden", "true");
+  Object.assign(layer.style, {
+    position: "fixed",
+    left: "0",
+    top: "0",
+    width: "100vw",
+    height: "100vh",
+    pointerEvents: "none",
+    zIndex: "2147483646",
+    overflow: "visible"
+  });
 
-wishStar?.addEventListener(
-  "click",
-  () => {
-    if (!wishCanvas || !wishCtx)
-      return;
+  const flash = document.createElement("div");
+  Object.assign(flash.style, {
+    position: "fixed",
+    left: `${x}px`,
+    top: `${y}px`,
+    width: "18px",
+    height: "18px",
+    borderRadius: "50%",
+    transform: "translate(-50%, -50%) scale(.2)",
+    background: "rgba(255,255,255,.98)",
+    boxShadow: "0 0 18px rgba(255,255,255,.95), 0 0 50px rgba(255,230,130,.9), 0 0 95px rgba(255,190,80,.65)",
+    opacity: "0"
+  });
+  layer.appendChild(flash);
 
-    sizeWishCanvas();
+  const ring = document.createElement("div");
+  Object.assign(ring.style, {
+    position: "fixed",
+    left: `${x}px`,
+    top: `${y}px`,
+    width: "26px",
+    height: "26px",
+    border: "2px solid rgba(255,240,190,.92)",
+    borderRadius: "50%",
+    transform: "translate(-50%, -50%) scale(.25)",
+    opacity: "0",
+    boxShadow: "0 0 20px rgba(255,225,150,.85)"
+  });
+  layer.appendChild(ring);
 
-    const name =
-      friendName || "you";
-
-    const text =
-      "HAPPY BIRTHDAY " +
-      name.toUpperCase() +
-      " ❤️";
-
-    const offCanvas =
-      document.createElement(
-        "canvas"
-      );
-
-    offCanvas.width =
-      wishCanvas.width;
-
-    offCanvas.height =
-      wishCanvas.height;
-
-    const offCtx =
-      offCanvas.getContext(
-        "2d"
-      );
-
-    let fontSize =
-      Math.min(
-        38,
-        wishCanvas.width /
-        (text.length *
-          0.55)
-      );
-
-    offCtx.font =
-      fontSize +
-      "px Outfit, sans-serif";
-
-    offCtx.fillStyle =
-      "#fff";
-
-    offCtx.textAlign =
-      "center";
-
-    offCtx.textBaseline =
-      "middle";
-
-    offCtx.fillText(
-      text,
-      offCanvas.width / 2,
-      offCanvas.height / 2
-    );
-
-    const imageData =
-      offCtx.getImageData(
-        0,
-        0,
-        offCanvas.width,
-        offCanvas.height
-      ).data;
-
-    const targets = [];
-    const step = 3;
-
-    for (
-      let y = 0;
-      y < offCanvas.height;
-      y += step
-    ) {
-      for (
-        let x = 0;
-        x < offCanvas.width;
-        x += step
-      ) {
-        const alpha =
-          imageData[
-          (y *
-            offCanvas.width +
-            x) *
-          4 +
-          3
-          ];
-
-        if (alpha > 120) {
-          targets.push({
-            x,
-            y
-          });
-        }
-      }
-    }
-
-    const particles =
-      targets.map(
-        (target) => ({
-          x:
-            Math.random() *
-            wishCanvas.width,
-
-          y:
-            Math.random() *
-            wishCanvas.height,
-
-          tx: target.x,
-          ty: target.y
-        })
-      );
-
-    let progress = 0;
-
-    function animateText() {
-      progress +=
-        reduceMotion
-          ? 1
-          : 0.045;
-
-      wishCtx.clearRect(
-        0,
-        0,
-        wishCanvas.width,
-        wishCanvas.height
-      );
-
-      wishCtx.fillStyle =
-        "#f2ecd9";
-
-      particles.forEach(
-        (particle) => {
-          const ease =
-            1 -
-            Math.pow(
-              1 -
-              Math.min(
-                progress,
-                1
-              ),
-              3
-            );
-
-          const x =
-            particle.x +
-            (particle.tx -
-              particle.x) *
-            ease;
-
-          const y =
-            particle.y +
-            (particle.ty -
-              particle.y) *
-            ease;
-
-          wishCtx.beginPath();
-
-          wishCtx.arc(
-            x,
-            y,
-            1.4,
-            0,
-            Math.PI * 2
-          );
-
-          wishCtx.fill();
-        }
-      );
-
-      if (
-        progress < 1
-      ) {
-        requestAnimationFrame(
-          animateText
-        );
-      }
-    }
-
-    animateText();
-
-    wishStar.style.display =
-      "none";
-  },
-  {
-    once: true
+  const chars = ["✦", "✧", "✦", "⋆", "✩", "✨", "·"];
+  for (let i = 0; i < 44; i += 1) {
+    const s = document.createElement("span");
+    s.textContent = chars[i % chars.length];
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 42 + Math.random() * 125;
+    const size = 10 + Math.random() * 12;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    Object.assign(s.style, {
+      position: "fixed",
+      left: `${x}px`,
+      top: `${y}px`,
+      fontSize: `${size}px`,
+      lineHeight: "1",
+      color: i % 3 === 0 ? "#ffffff" : "#ffe6a3",
+      textShadow: "0 0 8px rgba(255,255,255,.95), 0 0 22px rgba(255,205,110,.85)",
+      transform: "translate(-50%, -50%) scale(.2) rotate(0deg)",
+      opacity: "0"
+    });
+    s.dataset.dx = String(dx);
+    s.dataset.dy = String(dy);
+    s.dataset.rot = String((Math.random() - .5) * 260);
+    layer.appendChild(s);
   }
-);
+
+  document.body.appendChild(layer);
+
+  const start = performance.now();
+  const duration = 920;
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+
+  function frame(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const e = easeOut(t);
+
+    const fp = Math.min(1, t / 0.18);
+    flash.style.opacity = String(1 - Math.min(1, t / 0.55));
+    flash.style.transform = `translate(-50%, -50%) scale(${0.2 + fp * 5.2})`;
+
+    const rp = Math.min(1, t / 0.9);
+    ring.style.opacity = String((1 - rp) * 0.95);
+    ring.style.transform = `translate(-50%, -50%) scale(${0.25 + e * 8.5})`;
+
+    const sparks = layer.querySelectorAll("span");
+    sparks.forEach((s) => {
+      const dx = Number(s.dataset.dx || 0);
+      const dy = Number(s.dataset.dy || 0);
+      const rot = Number(s.dataset.rot || 0);
+      s.style.opacity = String(t < 0.12 ? t / 0.12 : Math.max(0, 1 - (t - 0.12) / 0.88));
+      s.style.transform = `translate(calc(-50% + ${dx * e}px), calc(-50% + ${dy * e}px)) scale(${0.2 + Math.sin(Math.min(1, t / 0.25) * Math.PI) * 1.15}) rotate(${rot * e}deg)`;
+    });
+
+    if (t < 1) requestAnimationFrame(frame);
+    else layer.remove();
+  }
+
+  requestAnimationFrame(frame);
+}
+
+function revealWishText() {
+  if (!wishCanvas || !wishCtx) return;
+
+  sizeWishCanvas();
+
+  const name = (typeof friendName !== "undefined" && friendName) ? friendName : "you";
+  const text = `HAPPY BIRTHDAY ${name.toUpperCase()} ❤️`;
+
+  const offCanvas = document.createElement("canvas");
+  offCanvas.width = wishCanvas.width;
+  offCanvas.height = wishCanvas.height;
+  const offCtx = offCanvas.getContext("2d");
+  if (!offCtx) return;
+
+  const fontSize = Math.max(18, Math.min(38, wishCanvas.width / Math.max(1, text.length * 0.55)));
+  offCtx.font = `${fontSize}px Outfit, sans-serif`;
+  offCtx.fillStyle = "#fff";
+  offCtx.textAlign = "center";
+  offCtx.textBaseline = "middle";
+  offCtx.fillText(text, offCanvas.width / 2, offCanvas.height / 2);
+
+  const imageData = offCtx.getImageData(0, 0, offCanvas.width, offCanvas.height).data;
+  const targets = [];
+  const step = 3;
+
+  for (let y = 0; y < offCanvas.height; y += step) {
+    for (let x = 0; x < offCanvas.width; x += step) {
+      const alpha = imageData[(y * offCanvas.width + x) * 4 + 3];
+      if (alpha > 120) targets.push({ x, y });
+    }
+  }
+
+  const particles = targets.map((target) => ({
+    x: Math.random() * wishCanvas.width,
+    y: Math.random() * wishCanvas.height,
+    tx: target.x,
+    ty: target.y
+  }));
+
+  let progress = 0;
+  function animateText() {
+    progress += (typeof reduceMotion !== "undefined" && reduceMotion) ? 1 : 0.045;
+    wishCtx.clearRect(0, 0, wishCanvas.width, wishCanvas.height);
+    wishCtx.fillStyle = "#f2ecd9";
+
+    const p = Math.min(progress, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    particles.forEach((particle) => {
+      const x = particle.x + (particle.tx - particle.x) * ease;
+      const y = particle.y + (particle.ty - particle.y) * ease;
+      wishCtx.beginPath();
+      wishCtx.arc(x, y, 1.4, 0, Math.PI * 2);
+      wishCtx.fill();
+    });
+
+    if (progress < 1) requestAnimationFrame(animateText);
+  }
+  animateText();
+}
+
+function runWishSequence(event) {
+  if (wishTriggered) return;
+  if (!wishStar) return;
+
+  wishTriggered = true;
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  event?.stopImmediatePropagation?.();
+
+  const r = wishStar.getBoundingClientRect();
+  const x = r.left + r.width / 2;
+  const y = r.top + r.height / 2;
+
+  createWishSparkleBurst(x, y);
+
+  wishStar.style.setProperty("pointer-events", "none", "important");
+  wishStar.style.cursor = "default";
+
+  window.setTimeout(() => {
+    revealWishText();
+    wishStar.style.display = "none";
+    if (wishHitTarget) {
+      wishHitTarget.remove();
+      wishHitTarget = null;
+    }
+  }, 620);
+}
+
+function makeWishHitTarget() {
+  if (!wishStar || !document.body) return;
+  if (wishHitTarget) return;
+
+  const hit = document.createElement("button");
+  hit.type = "button";
+  hit.id = "wish-star-hit-target";
+  hit.setAttribute("aria-label", "Tap the star to make a wish");
+  Object.assign(hit.style, {
+    position: "fixed",
+    width: "150px",
+    height: "150px",
+    padding: "0",
+    margin: "0",
+    border: "0",
+    background: "transparent",
+    opacity: "0",
+    pointerEvents: "auto",
+    cursor: "pointer",
+    zIndex: "2147483645",
+    display: "block"
+  });
+
+  hit.addEventListener("pointerdown", runWishSequence, true);
+  hit.addEventListener("click", runWishSequence, true);
+  document.body.appendChild(hit);
+  wishHitTarget = hit;
+
+  const place = () => {
+    if (!wishHitTarget || wishTriggered) return;
+    const r = wishStar.getBoundingClientRect();
+    wishHitTarget.style.left = `${r.left + r.width / 2 - 75}px`;
+    wishHitTarget.style.top = `${r.top + r.height / 2 - 75}px`;
+    hit.hidden = r.width < 1 || r.height < 1 || getComputedStyle(wishStar).display === "none";
+  };
+
+  place();
+  window.addEventListener("resize", place, { passive: true });
+  window.addEventListener("scroll", place, { passive: true });
+  window.setTimeout(place, 250);
+  window.setTimeout(place, 1000);
+  window.setTimeout(place, 2000);
+}
+
+if (wishStar) {
+  Object.assign(wishStar.style, {
+    pointerEvents: "auto",
+    cursor: "pointer",
+    position: "relative",
+    zIndex: "2147483644",
+    touchAction: "manipulation"
+  });
+
+  wishStar.addEventListener("pointerdown", runWishSequence, true);
+  wishStar.addEventListener("click", runWishSequence, true);
+  wishStar.addEventListener("touchend", runWishSequence, { passive: false, capture: true });
+  wishStar.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") runWishSequence(event);
+  }, true);
+
+  sizeWishCanvas();
+  makeWishHitTarget();
+}
+
+window.addEventListener("resize", sizeWishCanvas, { passive: true });
 
 /* =========================================================
    REPLAY
@@ -2349,27 +2224,25 @@ document
 
   const openGallery = (card) => {
     if (!card) return;
+
     const img = card.querySelector("img");
     const src = img?.getAttribute("src") || "";
     const match = src.match(/(?:^|\/)(\d+)\.jpeg(?:$|\?)/i);
     const number = Number(card.dataset.memoryNumber || match?.[1] || 0);
     if (!number) return;
+
     const photo = (window.__palkiMemoryPhotos || [])[number - 1];
     const caption = photo?.caption || card.getAttribute("aria-label") || `Memory ${number}`;
     const path = `images/memories/${number}.jpeg`;
 
-    card.classList.add("sparkling", "memory-card-selected");
-    window.setTimeout(() => card.classList.remove("sparkling", "memory-card-selected"), 900);
-
-    if (typeof window.openUnifiedViewer === "function") {
-      window.openUnifiedViewer(path, caption);
-    }
+    /* IMPORTANT: never open immediately. Always sparkle first. */
+    sparkleAndOpen(path, caption, card);
   };
 
   const openOrbit = (planet) => {
     const number = Number(planet?.dataset.memoryNumber || 0);
     if (number && typeof window.openMemoryImage === "function") {
-      window.openMemoryImage(number);
+      window.openMemoryImage(number, planet);
       return;
     }
     if (number && typeof window.openUnifiedViewer === "function") {
@@ -2390,11 +2263,8 @@ document
     const index = cards.indexOf(card);
     const data = flipData[index];
     if (!data) return;
-    card.classList.add("open", "sparkling");
-    window.setTimeout(() => card.classList.remove("sparkling"), 900);
-    if (typeof window.openUnifiedViewer === "function") {
-      window.openUnifiedViewer(data.image, data.caption);
-    }
+    card.classList.add("open");
+    sparkleAndOpen(data.image, data.caption, card);
   };
 
   const handlers = new WeakMap();
@@ -2418,6 +2288,7 @@ document
     bindCapture("#moon-wrap", () => openMoon());
     bindCapture("#envelope", () => revealLetter());
     bindCapture("#replay-btn", () => window.location.reload());
+    bindCapture("#wish-star", (star) => runWishSequence({ preventDefault() { }, stopPropagation() { }, stopImmediatePropagation() { } }));
     bindCapture("#memory-viewer-close", () => window.closeUnifiedViewer?.());
     bindCapture("#memory-viewer-backdrop", () => window.closeUnifiedViewer?.());
 
@@ -2461,7 +2332,7 @@ document
     if (!target) return;
 
     const clickable = target.closest(
-      "#unlock-enter-btn,#enter-btn,#moon-wrap,.photo-card,.orbit-planet,#envelope,.flip-card,#replay-btn"
+      "#unlock-enter-btn,#enter-btn,#moon-wrap,.photo-card,.orbit-planet,#envelope,.flip-card,#replay-btn,#wish-star"
     );
     if (!clickable) return;
 
@@ -2475,7 +2346,7 @@ document
   document.addEventListener("pointerdown", (event) => {
     const target = event.target instanceof Element ? event.target : null;
     if (target?.closest(
-      "#unlock-enter-btn,#enter-btn,#moon-wrap,.photo-card,.orbit-planet,#envelope,.flip-card,#replay-btn,#memory-viewer-close,#memory-viewer-backdrop"
+      "#unlock-enter-btn,#enter-btn,#moon-wrap,.photo-card,.orbit-planet,#envelope,.flip-card,#replay-btn,#wish-star,#memory-viewer-close,#memory-viewer-backdrop"
     )) return;
 
     const x = event.clientX;
@@ -2490,6 +2361,7 @@ document
       "#envelope",
       ".flip-card",
       "#replay-btn",
+      "#wish-star",
       "#memory-viewer-close",
       "#memory-viewer-backdrop"
     ];
@@ -2509,6 +2381,7 @@ document
         if (el.matches("#envelope")) return revealLetter();
         if (el.matches(".flip-card")) return openFlip(el);
         if (el.matches("#replay-btn")) return window.location.reload();
+        if (el.matches("#wish-star")) return runWishSequence(event);
         if (el.matches("#memory-viewer-close,#memory-viewer-backdrop")) return window.closeUnifiedViewer?.();
       }
     }
