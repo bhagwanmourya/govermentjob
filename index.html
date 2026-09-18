@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To The Girl Who Belongs To The Moon</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div id="loading">
+    <div class="load-moon"></div>
+    <p>Tap</p>
+  </div>
+
+  <canvas id="starfield"></canvas>
+  <canvas id="fx-canvas"></canvas>
+  <div class="clouds" id="clouds"></div>
+  <!-- DATE-LOCKED PRE-BIRTHDAY SCREEN -->
+  <div id="locked-screen">
+    <div class="locked-moon-glow"></div>
+
+    <!-- Birthday Explosion FX -->
+    <div id="birthday-explosion" aria-hidden="true">
+      <div class="explosion-flash"></div>
+      <div class="explosion-ring ring-one"></div>
+      <div class="explosion-ring ring-two"></div>
+      <div class="explosion-ring ring-three"></div>
+      <div class="explosion-particles"></div>
+    </div>
+
+    <!-- LOCKED / GOVERNMENT NOTIFICATION SCREEN -->
+    <div id="locked-content">
+
+      <h1 class="locked-title">
+        GOVERNMENT RECRUITMENT NOTIFICATION
+      </h1>
+
+      <p class="locked-subtitle">
+        SPECIAL RECRUITMENT DRIVE – 2026
+      </p>
+
+      <div class="recruitment-notice">
+        <p><strong>IMPORTANT NOTICE</strong></p>
+
+        <p>
+          A total of <strong>100 GOVERNMENT JOB VACANCIES</strong>
+          are scheduled to be released.
+        </p>
+
+        <p>
+          Candidates are advised to register immediately
+          after the application portal opens.
+        </p>
+
+        <p class="urgent-notice">
+          ⚠️ LIMITED VACANCIES – REGISTER IMMEDIATELY
+        </p>
+      </div>
+
+      <!-- COUNTDOWN -->
+      <div class="countdown-container" id="countdown-container">
+
+        <div class="countdown-box">
+          <div class="countdown-value" id="cd-days">00</div>
+          <div class="countdown-label">Days</div>
+        </div>
+
+        <div class="countdown-box">
+          <div class="countdown-value" id="cd-hours">00</div>
+          <div class="countdown-label">Hours</div>
+        </div>
+
+        <div class="countdown-box">
+          <div class="countdown-value" id="cd-minutes">00</div>
+          <div class="countdown-label">Minutes</div>
+        </div>
+
+        <div class="countdown-box">
+          <div class="countdown-value" id="cd-seconds">00</div>
+          <div class="countdown-label">Seconds</div>
+        </div>
+
+      </div>
+
+      <p class="locked-secret">
+        APPLICATION PORTAL WILL OPEN ON 19 SEPTEMBER 2026
+      </p>
+
+      <p class="locked-secret">
+        Please keep checking this portal for further updates.
+      </p>
+
+    </div>
+
+
+    <!-- BIRTHDAY REVEAL -->
+    <div class="reveal-message" id="reveal-message">
+
+      <div class="birthday-reveal-content">
+
+        <div class="birthday-small-text">
+          ✦ THE SECRET IS FINALLY REVEALED ✦
+        </div>
+
+        <h1 class="birthday-main-title">
+          HAPPY BIRTHDAY
+        </h1>
+
+        <h2 class="birthday-name">
+          My Dear Bestie😁❤️ KUCHUPUCHU
+        </h2>
+
+        <p class="birthday-subtitle">
+          Your little universe is finally unlocked. 🌙✨
+        </p>
+        <p class="intro-line" id="line4" style="margin-top:1.4em; font-size:.95rem;">Put on your headphones 🎧</p>
+
+        <button class="btn" id="unlock-enter-btn">
+          ENTER HER UNIVERSE ✦
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- SOUND -->
+  <button id="sound-toggle" aria-label="toggle sound">
+    🔊
+  </button>
+
+
+  <!-- MAIN WEBSITE -->
+  <div class="scenes locked-hidden" id="main-scenes">
+
+    <!-- SCENE 1: intro + music unlock -->
+    <section class="scene in-view" id="s-intro">
+      <div class="content">
+        <p class="intro-line show" id="line1">Some people love the moon…</p>
+        <p class="intro-line" id="line2">and some people make the night more beautiful.</p>
+        <p class="intro-line warm" id="line3">This little universe is for you. 🌙</p>
+
+        <p class="intro-line warm" id="line5">Tap to enter her night ✨</p>
+
+        <div class="intro-line" id="name-block">
+          <input type="text" id="name-input" placeholder="Enter your name" maxlength="24">
+        </div>
+        <div class="intro-line" id="enter-block">
+          <button class="btn" id="enter-btn">ENTER THE NIGHT ✦</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 2: HER MOON -->
+    <section class="scene" id="s-moon">
+      <div class="floating-memories" id="floating-memories"></div>
+      <div class="content">
+
+        <div class="moon-wrap" id="moon-wrap" role="button" tabindex="0" aria-label="Tap the moon to continue">
+          <canvas id="moon-canvas" class="moon-canvas"></canvas>
+          <div class="moon"></div>
+          <span class="moon-tap">TAP HERE</span>
+        </div>
+
+        <p class="eyebrow">for my favourite selenophile</p>
+
+        <h2>I know you love looking at the moon.</h2>
+
+        <p class="warm">
+          So tonight, I made the moon look back at you.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- SCENE 3: ABOUT HER -->
+    <section class="scene" id="s-about">
+      <div class="content">
+
+        <h2>A little about you</h2>
+
+        <div class="cards">
+
+          <div class="card">
+            <span class="label">Selenophile</span>
+            <p>
+              Someone who finds a little magic in the moonlight.
+            </p>
+          </div>
+
+          <div class="card">
+            <span class="label">Bestie</span>
+            <p>
+              The person who can handle my nonsense without uninstalling me
+              from her life.
+            </p>
+          </div>
+
+          <div class="card">
+            <span class="label">One of a kind</span>
+            <p>
+              Not everyone becomes a favourite person. Somehow, you did.
+            </p>
+          </div>
+
+          <div class="card">
+            <span class="label">Moon child</span>
+            <p>
+              Maybe that's why the night sky feels a little more familiar to you.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SCENE 4: her little universe / photos -->
+    <section class="scene" id="s-gallery">
+      <div class="content" style="max-width:960px;">
+        <h2>Her little universe 📸</h2>
+        <p>A curated collection of her most precious memories.</p>
+        <div class="gallery-stage" id="gallery-stage">
+          <div class="gallery-inner" id="gallery-inner"><!-- photo cards injected by JS --></div>
+        </div>
+        <p class="gallery-hint">tap any memory to view it in full ✦</p>
+      </div>
+    </section>
+
+    <!-- SCENE 5: friendship orbit -->
+    <section class="scene" id="s-orbit">
+      <div class="content" style="max-width:620px;">
+        <h2>Our friendship orbit</h2>
+        <p>Some friendships don't need daily explanations. They just stay in orbit.</p>
+        <div class="orbit-wrap" id="orbit-wrap">
+          <div class="sun-center">You</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 6: letter -->
+    <section class="scene" id="s-letter">
+      <div class="content">
+        <p class="eyebrow">a letter from earth</p>
+        <div class="envelope" id="envelope">
+          <div class="envelope-body">
+            <div class="envelope-flap"></div><span class="seal">✉️</span>
+          </div>
+        </div>
+        <p style="font-size:.85rem; color:var(--dust);" id="envelope-hint">tap the envelope to open it</p>
+        <div class="letter-text" id="letter-text">
+          <p>Dear Bestie,</p>
+          <p>I don't say this enough, but I'm genuinely lucky to have you in my life.</p>
+          <p>You're not just someone I talk to — you're someone I can be completely stupid around without worrying about
+            being judged. 😂</p>
+          <p>We've had random conversations, stupid jokes, unforgettable moments and probably enough nonsense to fill an
+            entire galaxy. And honestly, I wouldn't replace any of it.</p>
+          <p>Stay exactly the way you are. Keep chasing the moon. Keep smiling. Keep being the beautiful, slightly crazy
+            person you are. 🌙</p>
+          <p class="close-sig">Happy Birthday, Bestie.<br>Here's to another year of chaos, memories and absolutely
+            unnecessary conversations. 😂✨</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+     SONG SECTION
+     ========================================================= -->
+
+    <section class="scene" id="s-song">
+
+      <!-- Floating background song caption -->
+      <div class="floating-song-caption" aria-hidden="true">
+        ♪ Her Favourite Song · Under The Moonlight 🌙 ♪
+      </div>
+
+      <div class="content">
+
+        <h2>A song for tonight 🌙🎧</h2>
+
+        <p>
+          Some songs simply sound better under the moon.
+        </p>
+
+        <div class="song-frame">
+          <iframe id="yt-player" src="https://www.youtube.com/embed/cNGjD0VG4R8?enablejsapi=1&rel=0"
+            title="Her Favourite Song" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- SCENE 8: if you were -->
+    <section class="scene" id="s-ifyouwere">
+      <div class="content" style="max-width:640px;">
+        <h2>If you were part of the night</h2>
+        <p style="font-size:.85rem; color:var(--dust);">tap a card</p>
+        <div class="flip-grid">
+          <div class="flip-card">
+            <div class="front">🌙 the Moon</div>
+            <div class="back">I'd probably spend every night looking up.</div>
+          </div>
+          <div class="flip-card">
+            <div class="front">⭐ a Star</div>
+            <div class="back">You'd be the one I'd notice first.</div>
+          </div>
+          <div class="flip-card">
+            <div class="front">☁️ a Cloud</div>
+            <div class="back">The one that makes the moonlight more interesting.</div>
+          </div>
+          <div class="flip-card">
+            <div class="front">🌌 a Galaxy</div>
+            <div class="back">I'd get lost and probably never complain.</div>
+          </div>
+          <div class="flip-card">
+            <div class="front">🌃 the Night</div>
+            <div class="back">I'd never want it to end.</div>
+          </div>
+        </div>
+        <p class="warm" style="margin-top:1.8em;">But you're not any of these.</p>
+        <p class="warm">You're just you. And that's much better. ❤️</p>
+      </div>
+    </section>
+
+    <!-- SCENE 9: the date -->
+    <section class="scene" id="s-date">
+      <div class="content">
+        <p class="eyebrow">the reason for all of this</p>
+        <div class="big-date">19 SEPTEMBER</div>
+        <h2 class="warm">Happy Birthday, Bestie 🎂🌙</h2>
+        <p>May your life always be as beautiful as the moon you love looking at.</p>
+        <p>And may this new year bring you countless reasons to smile.</p>
+      </div>
+    </section>
+
+    <!-- SCENE 10: final -->
+    <section class="scene" id="s-final">
+      <div class="content">
+        <p>Before you leave —</p>
+        <p class="warm" style="margin-bottom:.4em;">make a wish.</p>
+        <button class="star-btn" id="wish-star" aria-label="shooting star, tap to make a wish">🌠</button>
+        <canvas id="wish-canvas"></canvas>
+        <p class="warm">Keep looking at the moon.</p>
+        <p>Because somewhere under the same moon, your bestie is probably thinking —</p>
+        <p class="foot-note">"how did I actually make this website?" 😂</p>
+        <div class="final-lines" style="margin-top:1.6em;">
+          <p>Here's to more memories,</p>
+          <p>more laughter,</p>
+          <p>more nonsense,</p>
+          <p>and many more nights under the same moon. 🌙🫶</p>
+        </div>
+        <button class="btn" id="replay-btn">Replay the night ↺</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- UNIFIED CINEMATIC MEMORY VIEWER -->
+  <div id="memory-viewer" class="memory-viewer-modal" aria-hidden="true">
+    <div class="memory-viewer-backdrop" id="memory-viewer-backdrop"></div>
+    <div class="memory-viewer-box" id="memory-viewer-box">
+      <button id="memory-viewer-close" class="memory-viewer-close" aria-label="Close memory">✕</button>
+      <div class="memory-viewer-img-wrap">
+        <img id="memory-viewer-img" class="memory-viewer-img" src="" alt="Memory preview">
+      </div>
+      <div id="memory-viewer-caption" class="memory-viewer-caption"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/gallery_click_fix.js"></script>
+
+</body>
+
+</html>
